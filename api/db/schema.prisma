@@ -17,9 +17,61 @@ generator client {
 //   name  String?
 // }
 
+model User {
+  id        Int        @id @default(autoincrement())
+  email     String     @unique
+  name      String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  tags      Tag[]
+  tracks    Track[]
+  playlists Playlist[]
+  folders   Folder[]
+}
+
 model Tag {
   id        Int      @id @default(autoincrement())
   title     String
   color     String
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tracks    Track[]
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+}
+
+model Track {
+  id        Int        @id @default(autoincrement())
+  title     String
+  artist    String
+  duration  Int
+  desc      String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  tags      Tag[]
+  playlists Playlist[]
+  user      User       @relation(fields: [userId], references: [id])
+  userId    Int
+}
+
+model Playlist {
+  id        Int      @id @default(autoincrement())
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tracks    Track[]
+  User      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  Folder    Folder?  @relation(fields: [folderId], references: [id])
+  folderId  Int?
+}
+
+model Folder {
+  id        Int        @id @default(autoincrement())
+  title     String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  playlists Playlist[]
+  User      User       @relation(fields: [userId], references: [id])
+  userId    Int
 }
