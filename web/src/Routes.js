@@ -13,6 +13,7 @@ import TagsLayout from 'src/layouts/TagsLayout'
 const Routes = () => {
   return (
     <Router>
+      <Route path="/library" page={LibraryPage} name="library" />
       <Set wrap={TagsLayout}>
         <Route path="/tags/new" page={TagNewTagPage} name="newTag" />
         <Route path="/tags/{id:Int}/edit" page={TagEditTagPage} name="editTag" />
