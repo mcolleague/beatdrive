@@ -4,7 +4,7 @@ const { Storage } = require('@google-cloud/storage')
 const storage = new Storage({ keyFilename: 'gc_key.json' })
 const bucketName = 'beatdrive-test-1'
 
-export const getFiles = async () => {
+export const files = async () => {
   const [files] = await storage.bucket(bucketName).getFiles()
   const filesMapped = files.map(({ metadata: { id, name, mediaLink } }) => {
     return {

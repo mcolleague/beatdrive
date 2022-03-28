@@ -1,9 +1,10 @@
 import Library from 'src/components/Library/Library'
 
 export const QUERY = gql`
-  query {
-    files {
-      mediaLink
+  query GetFiles {
+    getFiles {
+      id
+      name
     }
   }
 `

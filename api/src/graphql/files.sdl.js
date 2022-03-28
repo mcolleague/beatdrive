@@ -6,6 +6,7 @@ export const schema = gql`
   }
 
   type Query {
-    getFiles: [File] @skipAuth
+    files: [File!]! @skipAuth
+    file(id: String!): File @skipAuth
   }
 `
