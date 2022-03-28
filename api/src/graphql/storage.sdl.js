@@ -1,11 +1,11 @@
 export const schema = gql`
   type File {
-    id: Int!
-    title: String!
+    name: String!
+    mediaLink: String!
   }
 
   type Query {
-    files: [File!]! @skipAuth
+    files: [File] @skipAuth
     # file(id: Int!): Tag @requireAuth
   }
 
