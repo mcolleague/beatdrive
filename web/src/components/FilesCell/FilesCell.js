@@ -1,9 +1,10 @@
+/* eslint-disable jsx-a11y/media-has-caption */
 export const QUERY = gql`
   query FilesQuery {
     files {
       id
       name
-      mediaLink
+      url
     }
   }
 `
@@ -20,7 +21,12 @@ export const Success = ({ files }) => {
   return (
     <ul>
       {files.map((item) => {
-        return <li key={item.id}>{JSON.stringify(item)}</li>
+        return (
+          <li key={item.id}>
+            <span>{item.name}</span>
+            <audio controls src={item.url}></audio>
+          </li>
+        )
       })}
     </ul>
   )

@@ -3,6 +3,7 @@ export const schema = gql`
     id: String!
     name: String!
     mediaLink: String!
+    url: String!
   }
 
   type Query {

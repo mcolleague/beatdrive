@@ -1,5 +1,5 @@
 import { MetaTags } from '@redwoodjs/web'
-import Library from 'src/components/Library/Library'
+import FilesCell from 'src/components/FilesCell'
 
 const LibraryPage = () => {
   return (
@@ -7,7 +7,7 @@ const LibraryPage = () => {
       <MetaTags title="Library" description="Library" />
 
       <h1>Library</h1>
-      <Library />
+      <FilesCell />
     </>
   )
 }
