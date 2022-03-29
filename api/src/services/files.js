@@ -1,8 +1,12 @@
-const { Storage } = require('@google-cloud/storage')
-
-// @TODO: figure out why it doesn't use .ENV automatically
-const storage = new Storage({ keyFilename: 'gc_key.json' })
 const bucketName = 'beatdrive-test-1'
+const { Storage } = require('@google-cloud/storage')
+const storage = new Storage({
+  projectId: 'beatdrive',
+  credentials: {
+    client_email: process.env.GCP_CLIENT_EMAIL,
+    private_key: process.env.GCP_PRIVATE_KEY.replace(/\\n/g, '\n'),
+  },
+})
 
 export const getSignedUrl = async (fileName) => {
   // These options will allow temporary read access to the file
