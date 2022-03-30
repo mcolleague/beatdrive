@@ -9,7 +9,7 @@ const LibraryPage = () => {
 
       <h1>Library</h1>
       <ItunesLibraryXMLFileCellStories />
-      {/* <FilesCell /> */}
+      <FilesCell />
     </>
   )
 }
