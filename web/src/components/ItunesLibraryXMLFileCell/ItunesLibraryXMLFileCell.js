@@ -32,6 +32,21 @@ export const Success = ({ itunesLibraryXMLFile: { url } }) => {
     }
   }
 
+  const parseNode = (node) => {
+    const { tagName, nextElementSibling } = node
+
+    switch (tagName) {
+      case 'key':
+        break
+      case 'dict':
+        break
+      case 'array':
+        break
+      default:
+        break
+    }
+  }
+
   const fetchXML = async () => {
     console.log('fetching xml...')
     const res = await fetch(url)
