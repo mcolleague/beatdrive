@@ -1,6 +1,3 @@
-const fetch = require('node-fetch')
-const xml2js = require('xml2js')
-
 const { Storage } = require('@google-cloud/storage')
 const storage = new Storage({
   projectId: 'beatdrive',
@@ -11,6 +8,14 @@ const storage = new Storage({
 })
 const bucketName = 'beatdrive-test-1'
 const bucket = storage.bucket(bucketName)
+const corsConfigOpts = [
+  {
+    maxAgeSeconds: 3600,
+    method: ['GET', 'HEAD'],
+    responseHeader: ['Content-Type'],
+    origin: ['http://localhost:8910', 'https://beatdrive.netlify.app/'],
+  },
+]
 
 export const getSignedUrl = async (fileName) => {
   // These options will allow temporary read access to the file
@@ -48,15 +53,12 @@ export const itunesLibraryXMLFile = async () => {
   const { id, name } = file
   const url = await getSignedUrl(name)
 
-  const response = await fetch(url)
-  const xml = await response.text()
-  // const parser = new xml2js.Parser()
-  // const parsed = await parser.parseStringPromise(xml, { mergeAttrs: true })
+  //@TODO move this to its own function
+  await storage.bucket(bucketName).setCorsConfiguration(corsConfigOpts)
 
   return {
     id,
     name,
     url,
-    data: xml,
   }
 }
