@@ -18,14 +18,17 @@ export const Success = ({ itunesLibraryXMLFile: { url } }) => {
   const fetchXML = async () => {
     console.log('fetching xml...')
     const res = await fetch(url)
-    const xml = await res.text()
-    window.libxml = xml
-    console.log({ xml })
+    const xmlStr = await res.text()
+
+    if (!window.libxml) {
+      const parser = new DOMParser()
+      const xml = parser.parseFromString(xmlStr, 'application/xml')
+      window.libxml = xml
+      console.log(xml)
+    }
   }
 
   fetchXML()
 
-  return (
-    <button onClick={() => console.log({ xml: window.libxml })}>Log XML</button>
-  )
+  return <button onClick={() => console.log(window.libxml)}>Log XML</button>
 }
