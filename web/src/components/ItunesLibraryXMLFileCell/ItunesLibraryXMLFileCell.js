@@ -17,30 +17,41 @@ export const Failure = ({ error }) => (
 export const Success = ({ itunesLibraryXMLFile: { url } }) => {
   const isSimpleNode = (node) => !['array', 'dict'].includes(node?.tagName)
   const isKey = (node) => node?.tagName === 'key'
-  const nodeReducer = (prev, curr) => {
-    const { innerHTML, prevElementSibling, nextElementSibling } = curr
-
-    // Ignore if already parsed in previous iteration
-    if (isKey(prevElementSibling)) return prev
-
-    // Key value pair
-    if (isKey(curr)) {
-      // Simple value
-      if (isSimpleNode(nextElementSibling)) {
-        const { tagName: tagNameNext, innerHTML: innerHTMLNext } =
-          nextElementSibling
-        return { ...prev, [innerHTML]: innerHTMLNext }
-
-        // Complex value
-      } else {
-        return { ...prev, [innerHTML]: parseNode(nextElementSibling) }
-      }
-    }
-
-    return prev
+  const arrayChildNodeReducer = (prev, curr) => {
+    return curr.tagName === 'key' ? prev : [...prev, parseComplexNode(curr)]
   }
 
-  const parseNode = (node) => [...node.children].reduce(nodeReducer, {})
+  const nodeReducer = (prev, curr) => {
+    const { innerHTML, previousElementSibling, nextElementSibling } = curr
+
+    // Ignore if already parsed in previous iteration
+    if (isKey(previousElementSibling)) return prev
+
+    // Key value pair
+    if (isKey(curr) && nextElementSibling) {
+      const { innerHTML: innerHTMLNext } = nextElementSibling
+
+      if (isSimpleNode(nextElementSibling)) {
+        return { ...prev, [innerHTML]: innerHTMLNext }
+      } else {
+        const forceArray = innerHTML === 'Tracks'
+        const value = parseComplexNode(nextElementSibling, forceArray)
+        return {
+          ...prev,
+          [innerHTML]: value,
+        }
+      }
+    }
+  }
+
+  const parseComplexNode = (node, forceArray) => {
+    const { tagName, children } = node
+    const useArray = tagName === 'array' || forceArray
+
+    return useArray
+      ? [...children].reduce(arrayChildNodeReducer, [])
+      : [...children].reduce(nodeReducer, {})
+  }
 
   const fetchXML = async () => {
     console.log('fetching xml...')
@@ -54,7 +65,7 @@ export const Success = ({ itunesLibraryXMLFile: { url } }) => {
       console.log(xml)
 
       // Very slow!!!
-      console.log(parseNode(xml.children[0].children[0]))
+      console.log(parseComplexNode(xml.children[0].children[0]))
     }
   }
 

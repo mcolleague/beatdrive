@@ -24,7 +24,7 @@ export const Success = ({ files }) => {
         return (
           <li key={item.id}>
             <span>{item.name}</span>
-            <audio controls src={item.url}></audio>
+            <audio controls preload="none" src={item.url}></audio>
           </li>
         )
       })}
