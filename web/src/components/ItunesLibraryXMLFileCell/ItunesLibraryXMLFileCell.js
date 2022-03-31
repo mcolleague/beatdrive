@@ -15,37 +15,32 @@ export const Failure = ({ error }) => (
 )
 
 export const Success = ({ itunesLibraryXMLFile: { url } }) => {
-  const simpleNodeReducer = (prev, curr, i, arr) => {
-    return i % 2
-      ? prev
-      : {
-          ...prev,
-          [curr.innerHTML]: arr[i + 1].innerHTML,
-        }
-  }
+  const isSimpleNode = (node) => !['array', 'dict'].includes(node?.tagName)
+  const isKey = (node) => node?.tagName === 'key'
+  const nodeReducer = (prev, curr) => {
+    const { innerHTML, prevElementSibling, nextElementSibling } = curr
 
-  const toTracks = (prev, curr, i) => {
-    if (i % 2 === 0) {
-      return prev
-    } else {
-      return [...prev, [...curr.children].reduce(simpleNodeReducer, {})]
+    // Ignore if already parsed in previous iteration
+    if (isKey(prevElementSibling)) return prev
+
+    // Key value pair
+    if (isKey(curr)) {
+      // Simple value
+      if (isSimpleNode(nextElementSibling)) {
+        const { tagName: tagNameNext, innerHTML: innerHTMLNext } =
+          nextElementSibling
+        return { ...prev, [innerHTML]: innerHTMLNext }
+
+        // Complex value
+      } else {
+        return { ...prev, [innerHTML]: parseNode(nextElementSibling) }
+      }
     }
+
+    return prev
   }
 
-  const parseNode = (node) => {
-    const { tagName, nextElementSibling } = node
-
-    switch (tagName) {
-      case 'key':
-        break
-      case 'dict':
-        break
-      case 'array':
-        break
-      default:
-        break
-    }
-  }
+  const parseNode = (node) => [...node.children].reduce(nodeReducer, {})
 
   const fetchXML = async () => {
     console.log('fetching xml...')
@@ -58,12 +53,8 @@ export const Success = ({ itunesLibraryXMLFile: { url } }) => {
       window.libxml = xml
       console.log(xml)
 
-      const trackDictChildren =
-        xml.children[0].children[0].querySelector('dict').children
-
-      const tracks = [...trackDictChildren].reduce(toTracks, [])
-
-      console.log({ trackDictChildren, tracks })
+      // Very slow!!!
+      console.log(parseNode(xml.children[0].children[0]))
     }
   }
 
