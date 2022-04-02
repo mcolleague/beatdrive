@@ -17,6 +17,7 @@ export const Failure = ({ error }) => (
 export const Success = ({ itunesLibraryXMLFile: { url } }) => {
   const isSimpleNode = (node) => !['array', 'dict'].includes(node?.tagName)
   const isKey = (node) => node?.tagName === 'key'
+
   const arrayChildNodeReducer = (prev, curr) => {
     return curr.tagName === 'key' ? prev : [...prev, parseComplexNode(curr)]
   }
@@ -53,6 +54,77 @@ export const Success = ({ itunesLibraryXMLFile: { url } }) => {
       : [...children].reduce(nodeReducer, {})
   }
 
+  const processLibraryJSON = (json) => {
+    console.log(json)
+
+    const toFormattedTrack = ({
+      ['Track ID']: id,
+      ['Artist']: artist,
+      ['Name']: title,
+      ['Location']: filePath,
+      ['Total Time']: duration,
+    }) => {
+      return { id, artist, title, filePath, duration }
+    }
+
+    const toFormattedPlaylist = ({
+      ['Name']: title,
+      ['Playlist ID']: id,
+      ['Playlist Items']: trackReferences = [],
+      ['Playlist Persistent ID']: persistentId,
+      ['Parent Persistent ID']: parentPersistentId,
+    }) => {
+      const trackIds = trackReferences.map((ref) => ref['Track ID'])
+      return { id, title, trackIds, persistentId, parentPersistentId }
+    }
+
+    const tracks = json['Tracks'].map(toFormattedTrack)
+    const playlists = json['Playlists'].map(toFormattedPlaylist)
+
+    const toProcessedPlaylist = ({
+      id,
+      title,
+      trackIds,
+      persistentId,
+      // parentPersistentId,
+    }) => {
+      const playlistTracks = trackIds.map((trackId) => {
+        return tracks.find(({ id }) => id === trackId)
+      })
+      // Reducer?
+      const playlistChildren = playlists
+        .filter((p) => p.parentPersistentId === persistentId)
+        .map(toProcessedPlaylist)
+
+      return {
+        tracks: playlistTracks,
+        children: playlistChildren,
+        id,
+        title,
+      }
+    }
+
+    const topLevelPlaylists = playlists.reduce((prev, curr, i, arr) => {
+      const { parentPersistentId } = curr
+
+      if (parentPersistentId) {
+        const parent = arr.find((pl) => pl.persistentId === parentPersistentId)
+        const isTopLevel = !parent.parentPersistentId
+        const isDuplicate = prev.includes(parent)
+        return isTopLevel && !isDuplicate ? [...prev, parent] : prev
+      } else {
+        return prev
+      }
+    }, [])
+
+    const processedJSON = {
+      playlists: topLevelPlaylists.map(toProcessedPlaylist),
+    }
+
+    console.log(processedJSON)
+    return processedJSON
+  }
+
   const fetchXML = async () => {
     console.log('fetching xml...')
     const res = await fetch(url)
@@ -64,8 +136,10 @@ export const Success = ({ itunesLibraryXMLFile: { url } }) => {
       window.libxml = xml
       console.log(xml)
 
-      // Very slow!!!
-      console.log(parseComplexNode(xml.children[0].children[0]))
+      setTimeout(() => {
+        const json = parseComplexNode(xml.children[0].children[0])
+        processLibraryJSON(json)
+      }, 50)
     }
   }
 
