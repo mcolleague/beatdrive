@@ -18,6 +18,15 @@ export const Failure = ({ error }) => (
 )
 
 export const Success = ({ files }) => {
+  const mm = require('music-metadata-browser')
+  const { makeTokenizer } = require('@tokenizer/http')
+
+  const logMetadata = async (audioTrackUrl) => {
+    const httpTokenizer = await makeTokenizer(audioTrackUrl)
+    const metadata = await mm.parseFromTokenizer(httpTokenizer)
+    console.log('metadata:', metadata)
+  }
+
   return (
     <ul>
       {files.map((item) => {
@@ -25,6 +34,7 @@ export const Success = ({ files }) => {
           <li key={item.id}>
             <span>{item.name}</span>
             <audio controls preload="none" src={item.url}></audio>
+            <button onClick={() => logMetadata(item.url)}>Test</button>
           </li>
         )
       })}
